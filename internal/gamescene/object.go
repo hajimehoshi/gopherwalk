@@ -44,14 +44,18 @@ type ObjectWall struct {
 	y   int
 }
 
-func (o *ObjectWall) Touches(rect image.Rectangle) bool {
+func (o *ObjectWall) area() image.Rectangle {
 	w := tileWidth
 	h := tileHeight
 	if o.big {
 		w *= 2
 		h *= 2
 	}
-	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h).Overlaps(rect)
+	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
+}
+
+func (o *ObjectWall) Touches(rect image.Rectangle) bool {
+	return o.area().Overlaps(rect)
 }
 
 func (o *ObjectWall) Conflicts(rect image.Rectangle) bool {
@@ -59,7 +63,9 @@ func (o *ObjectWall) Conflicts(rect image.Rectangle) bool {
 }
 
 func (o *ObjectWall) ConflictsWithFoot(rect image.Rectangle) bool {
-	return o.Touches(rect)
+	a := o.area()
+	a.Max.Y = a.Min.Y + 1
+	return a.Overlaps(rect)
 }
 
 func (o *ObjectWall) Update(context scene.Context) {
@@ -101,12 +107,6 @@ func (o *ObjectFF) Touches(rect image.Rectangle) bool {
 	if !o.on {
 		return false
 	}
-	w := tileWidth
-	h := tileHeight
-	if o.big {
-		w *= 2
-		h *= 2
-	}
 	return o.area().Overlaps(rect)
 }
 
@@ -115,7 +115,12 @@ func (o *ObjectFF) Conflicts(rect image.Rectangle) bool {
 }
 
 func (o *ObjectFF) ConflictsWithFoot(rect image.Rectangle) bool {
-	return o.Touches(rect)
+	if !o.on {
+		return false
+	}
+	a := o.area()
+	a.Max.Y = a.Min.Y + 1
+	return a.Overlaps(rect)
 }
 
 func (o *ObjectFF) Update(context scene.Context) {
