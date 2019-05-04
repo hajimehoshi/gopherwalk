@@ -81,12 +81,12 @@ w              w
 w              w
 w              w
 w              w
-w              w
-w              w
-w              w
-w  eF.F.F.F.F. w
-w  e.......... w
-w  e           w
+wW.wF.F.F.F.eF.w
+w..w........e..w
+w           e  w
+w           e  w
+w  eW.F.F.W.W.ww
+w  e..........ww
 w  e           w
 w  e          sw
 wwwwwwwwwwwwwwww

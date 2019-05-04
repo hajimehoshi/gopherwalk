@@ -60,8 +60,9 @@ func (p *Player) Update(context scene.Context, f *Field) {
 			}
 			p.falling = true
 		}
-		// TODO: Fall faster speed without skipping to detect confliction.
-		p.y32 += 2
+		for i := 0; i < 3 && !f.ConflictsWithFoot(p.footArea()); i++ {
+			p.y32++
+		}
 	} else {
 		p.falling = false
 	}
