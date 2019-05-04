@@ -20,6 +20,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+
+	"github.com/hajimehoshi/gopherwalk/internal/scene"
 )
 
 const (
@@ -31,6 +33,8 @@ type Object interface {
 	Touches(rect image.Rectangle) bool
 	Conflicts(rect image.Rectangle) bool
 	ConflictsWithFoot(rect image.Rectangle) bool
+
+	Update(context scene.Context)
 	Draw(screen *ebiten.Image)
 }
 
@@ -58,17 +62,20 @@ func (o *ObjectWall) ConflictsWithFoot(rect image.Rectangle) bool {
 	return o.Touches(rect)
 }
 
+func (o *ObjectWall) Update(context scene.Context) {
+}
+
 func (o *ObjectWall) Draw(screen *ebiten.Image) {
 	x := o.x * tileWidth
 	y := o.y * tileHeight
 	if o.big {
 		w := tileWidth*2 - 1
 		h := tileWidth*2 - 1
-		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), color.RGBA{0x66, 0x66, 0x66, 0xff})
+		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), color.NRGBA{0x66, 0x66, 0x66, 0xff})
 	} else {
 		w := tileWidth - 1
 		h := tileWidth - 1
-		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), color.RGBA{0x66, 0x66, 0x66, 0xff})
+		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), color.NRGBA{0x66, 0x66, 0x66, 0xff})
 	}
 }
 
@@ -78,6 +85,16 @@ type ObjectFF struct {
 	y   int
 
 	on bool
+}
+
+func (o *ObjectFF) area() image.Rectangle {
+	w := tileWidth
+	h := tileHeight
+	if o.big {
+		w *= 2
+		h *= 2
+	}
+	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
 func (o *ObjectFF) Touches(rect image.Rectangle) bool {
@@ -90,7 +107,7 @@ func (o *ObjectFF) Touches(rect image.Rectangle) bool {
 		w *= 2
 		h *= 2
 	}
-	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h).Overlaps(rect)
+	return o.area().Overlaps(rect)
 }
 
 func (o *ObjectFF) Conflicts(rect image.Rectangle) bool {
@@ -101,17 +118,32 @@ func (o *ObjectFF) ConflictsWithFoot(rect image.Rectangle) bool {
 	return o.Touches(rect)
 }
 
+func (o *ObjectFF) Update(context scene.Context) {
+	if !context.Input().IsJustTapped() {
+		return
+	}
+	x, y := context.Input().CursorPosition()
+	if !image.Pt(x, y).In(o.area()) {
+		return
+	}
+	o.on = !o.on
+}
+
 func (o *ObjectFF) Draw(screen *ebiten.Image) {
+	c := color.NRGBA{0xff, 0x00, 0x00, 0x40}
+	if o.on {
+		c = color.NRGBA{0xff, 0x00, 0x00, 0xff}
+	}
 	x := o.x * tileWidth
 	y := o.y * tileHeight
 	if o.big {
 		w := tileWidth*2 - 1
 		h := tileWidth*2 - 1
-		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), color.RGBA{0xff, 0x00, 0x00, 0x40})
+		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), c)
 	} else {
 		w := tileWidth - 1
 		h := tileWidth - 1
-		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), color.RGBA{0xff, 0x00, 0x00, 0x40})
+		ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), c)
 	}
 }
 
@@ -134,8 +166,11 @@ func (o *ObjectElevator) ConflictsWithFoot(rect image.Rectangle) bool {
 	return o.Touches(rect)
 }
 
+func (o *ObjectElevator) Update(context scene.Context) {
+}
+
 func (o *ObjectElevator) Draw(screen *ebiten.Image) {
 	x := o.x * tileWidth
 	y := o.y * tileHeight
-	ebitenutil.DrawRect(screen, float64(x), float64(y), float64(tileWidth-1), float64(tileHeight-1), color.RGBA{0xff, 0xff, 0x00, 0xff})
+	ebitenutil.DrawRect(screen, float64(x), float64(y), float64(tileWidth-1), float64(tileHeight-1), color.NRGBA{0xff, 0xff, 0x00, 0xff})
 }

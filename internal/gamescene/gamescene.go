@@ -36,13 +36,14 @@ func (s *GameScene) Update(context scene.Context) error {
 		s.player = NewPlayer(x, y)
 	}
 
+	s.field.Update(context)
 	s.player.Update(context, s.field)
 
 	return nil
 }
 
 func (s *GameScene) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{0x99, 0xcc, 0xff, 0xff})
+	screen.Fill(color.NRGBA{0x99, 0xcc, 0xff, 0xff})
 	s.field.Draw(screen)
 	s.player.Draw(screen)
 }

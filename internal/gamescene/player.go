@@ -47,10 +47,12 @@ func NewPlayer(x, y int) *Player {
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
+	falling := false
 	if f.InElevator(p.elevatorArea()) {
 		p.y32--
 	} else if !f.ConflictsWithFoot(p.fallArea()) {
 		p.y32 += 3
+		falling = true
 	} else {
 		a := p.conflictionArea()
 		switch p.dir {
@@ -75,15 +77,17 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		}
 	}
 
-	x, y := context.Input().CursorPosition()
-	if image.Pt(x, y).In(p.clickableArea()) && context.Input().IsJustTapped() {
-		switch p.dir {
-		case PlayerDirLeft:
-			p.dir = PlayerDirRight
-		case PlayerDirRight:
-			p.dir = PlayerDirLeft
-		default:
-			panic("not reached")
+	if !falling {
+		x, y := context.Input().CursorPosition()
+		if image.Pt(x, y).In(p.clickableArea()) && context.Input().IsJustTapped() {
+			switch p.dir {
+			case PlayerDirLeft:
+				p.dir = PlayerDirRight
+			case PlayerDirRight:
+				p.dir = PlayerDirLeft
+			default:
+				panic("not reached")
+			}
 		}
 	}
 }
@@ -100,11 +104,11 @@ func (p *Player) elevatorArea() image.Rectangle {
 	case PlayerDirLeft:
 		x = (p.x32*tileWidth)/PlayerUnit + tileWidth*3/4
 	case PlayerDirRight:
-		x = (p.x32*tileWidth)/PlayerUnit
+		x = (p.x32 * tileWidth) / PlayerUnit
 	default:
 		panic("not reached")
 	}
-	y := (p.y32*tileHeight)/PlayerUnit
+	y := (p.y32 * tileHeight) / PlayerUnit
 	return image.Rect(x, y, x+tileWidth/4, y+tileHeight)
 }
 
@@ -118,7 +122,7 @@ func (p *Player) fallArea() image.Rectangle {
 	x := 0
 	switch p.dir {
 	case PlayerDirLeft:
-		x = (p.x32*tileWidth)/PlayerUnit
+		x = (p.x32 * tileWidth) / PlayerUnit
 	case PlayerDirRight:
 		x = (p.x32*tileWidth)/PlayerUnit + tileWidth/2
 	default:
@@ -130,11 +134,11 @@ func (p *Player) fallArea() image.Rectangle {
 
 func (p *Player) Draw(screen *ebiten.Image) {
 	a := p.clickableArea()
-	ebitenutil.DrawRect(screen, float64(a.Min.X), float64(a.Min.Y), float64(a.Dx()), float64(a.Dy()), color.RGBA{0, 0, 0xff, 0x40})
+	ebitenutil.DrawRect(screen, float64(a.Min.X), float64(a.Min.Y), float64(a.Dx()), float64(a.Dy()), color.NRGBA{0, 0, 0xff, 0x40})
 	a2 := p.conflictionArea()
-	ebitenutil.DrawRect(screen, float64(a2.Min.X), float64(a2.Min.Y), float64(a2.Dx()), float64(a2.Dy()), color.RGBA{0, 0, 0xff, 0x40})
+	ebitenutil.DrawRect(screen, float64(a2.Min.X), float64(a2.Min.Y), float64(a2.Dx()), float64(a2.Dy()), color.NRGBA{0, 0, 0xff, 0x40})
 	a3 := p.elevatorArea()
-	ebitenutil.DrawRect(screen, float64(a3.Min.X), float64(a3.Min.Y), float64(a3.Dx()), float64(a3.Dy()), color.RGBA{0, 0, 0xff, 0xff})
+	ebitenutil.DrawRect(screen, float64(a3.Min.X), float64(a3.Min.Y), float64(a3.Dx()), float64(a3.Dy()), color.NRGBA{0, 0, 0xff, 0xff})
 	a4 := p.fallArea()
-	ebitenutil.DrawRect(screen, float64(a4.Min.X), float64(a4.Min.Y), float64(a4.Dx()), float64(a4.Dy()), color.RGBA{0, 0, 0xff, 0x80})
+	ebitenutil.DrawRect(screen, float64(a4.Min.X), float64(a4.Min.Y), float64(a4.Dx()), float64(a4.Dy()), color.NRGBA{0, 0, 0xff, 0x80})
 }

@@ -19,6 +19,8 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten"
+
+	"github.com/hajimehoshi/gopherwalk/internal/scene"
 )
 
 type Field struct {
@@ -58,6 +60,12 @@ func (f *Field) InElevator(rect image.Rectangle) bool {
 		}
 	}
 	return false
+}
+
+func (f *Field) Update(context scene.Context) {
+	for _, t := range f.objects {
+		t.Update(context)
+	}
 }
 
 func (f *Field) Draw(screen *ebiten.Image) {
