@@ -84,11 +84,11 @@ w              w
 w              w
 w              w
 w              w
-weW.F.F.F.F.W. w
-we............ w
-we             w
-we             w
-we            sw
+w  eF.F.F.F.F. w
+w  e.......... w
+w  e           w
+w  e           w
+w  e          sw
 wwwwwwwwwwwwwwww
 `
 

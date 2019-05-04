@@ -34,9 +34,10 @@ const (
 const PlayerUnit = 32
 
 type Player struct {
-	x32 int
-	y32 int
-	dir PlayerDir
+	x32     int
+	y32     int
+	dir     PlayerDir
+	falling bool
 }
 
 func NewPlayer(x, y int) *Player {
@@ -47,37 +48,52 @@ func NewPlayer(x, y int) *Player {
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
-	falling := false
-	if f.InElevator(p.elevatorArea()) {
-		p.y32--
-	} else if !f.ConflictsWithFoot(p.fallArea()) {
-		p.y32 += 3
-		falling = true
+	if !f.ConflictsWithFoot(p.footArea()) {
+		if !p.falling {
+			switch p.dir {
+			case PlayerDirLeft:
+				p.x32 -= 8
+			case PlayerDirRight:
+				p.x32 += 8
+			default:
+				panic("not reached")
+			}
+			p.falling = true
+		}
+		// TODO: Fall faster speed without skipping to detect confliction.
+		p.y32 += 2
 	} else {
-		a := p.conflictionArea()
-		switch p.dir {
-		case PlayerDirLeft:
-			a.Min.X--
-			a.Max.X--
-			if f.Conflicts(a) {
-				p.dir = PlayerDirRight
-			} else {
-				p.x32--
+		p.falling = false
+	}
+	if !p.falling {
+		if f.InElevator(p.elevatorArea()) {
+			p.y32--
+		} else {
+			a := p.conflictionArea()
+			switch p.dir {
+			case PlayerDirLeft:
+				a.Min.X--
+				a.Max.X--
+				if f.Conflicts(a) {
+					p.dir = PlayerDirRight
+				} else {
+					p.x32--
+				}
+			case PlayerDirRight:
+				a.Min.X++
+				a.Max.X++
+				if f.Conflicts(a) {
+					p.dir = PlayerDirLeft
+				} else {
+					p.x32++
+				}
+			default:
+				panic("not reached")
 			}
-		case PlayerDirRight:
-			a.Min.X++
-			a.Max.X++
-			if f.Conflicts(a) {
-				p.dir = PlayerDirLeft
-			} else {
-				p.x32++
-			}
-		default:
-			panic("not reached")
 		}
 	}
 
-	if !falling {
+	if !p.falling {
 		x, y := context.Input().CursorPosition()
 		if image.Pt(x, y).In(p.clickableArea()) && context.Input().IsJustTapped() {
 			switch p.dir {
@@ -104,12 +120,12 @@ func (p *Player) elevatorArea() image.Rectangle {
 	case PlayerDirLeft:
 		x = (p.x32*tileWidth)/PlayerUnit + tileWidth*3/4
 	case PlayerDirRight:
-		x = (p.x32 * tileWidth) / PlayerUnit
+		x = (p.x32*tileWidth)/PlayerUnit + tileWidth/4 - 1
 	default:
 		panic("not reached")
 	}
 	y := (p.y32 * tileHeight) / PlayerUnit
-	return image.Rect(x, y, x+tileWidth/4, y+tileHeight)
+	return image.Rect(x, y, x+1, y+tileHeight)
 }
 
 func (p *Player) clickableArea() image.Rectangle {
@@ -118,7 +134,7 @@ func (p *Player) clickableArea() image.Rectangle {
 	return image.Rect(x, y, x+tileWidth*2, y+tileHeight*2)
 }
 
-func (p *Player) fallArea() image.Rectangle {
+func (p *Player) footArea() image.Rectangle {
 	x := 0
 	switch p.dir {
 	case PlayerDirLeft:
@@ -139,6 +155,6 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	ebitenutil.DrawRect(screen, float64(a2.Min.X), float64(a2.Min.Y), float64(a2.Dx()), float64(a2.Dy()), color.NRGBA{0, 0, 0xff, 0x40})
 	a3 := p.elevatorArea()
 	ebitenutil.DrawRect(screen, float64(a3.Min.X), float64(a3.Min.Y), float64(a3.Dx()), float64(a3.Dy()), color.NRGBA{0, 0, 0xff, 0xff})
-	a4 := p.fallArea()
+	a4 := p.footArea()
 	ebitenutil.DrawRect(screen, float64(a4.Min.X), float64(a4.Min.Y), float64(a4.Dx()), float64(a4.Dy()), color.NRGBA{0, 0, 0xff, 0x80})
 }
