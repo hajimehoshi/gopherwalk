@@ -49,11 +49,10 @@ func (f *Field) Conflicts(rect image.Rectangle, dir Dir) bool {
 
 func (f *Field) TouchesElevator(rect image.Rectangle, dir Dir) bool {
 	for _, o := range f.objects {
-		e, ok := o.(*ObjectElevator)
-		if !ok {
+		if _, ok := o.(*ObjectElevator); !ok {
 			continue
 		}
-		if e.OverlapsWithDir(rect, dir) {
+		if o.OverlapsWithDir(rect, dir) {
 			return true
 		}
 	}

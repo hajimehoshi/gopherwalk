@@ -38,6 +38,26 @@ const (
 	tileHeight = 16
 )
 
+func shift(area image.Rectangle, dir Dir) image.Rectangle {
+	switch dir {
+	case DirLeft:
+		area.Min.X--
+		area.Max.X--
+	case DirRight:
+		area.Min.X++
+		area.Max.X++
+	case DirUp:
+		area.Min.Y--
+		area.Max.Y--
+	case DirDown:
+		area.Min.Y++
+		area.Max.Y++
+	default:
+		panic("not reached")
+	}
+	return area
+}
+
 func edge(area image.Rectangle, from Dir) image.Rectangle {
 	switch from {
 	case DirLeft:
@@ -78,7 +98,7 @@ func (o *ObjectWall) area() image.Rectangle {
 }
 
 func (o *ObjectWall) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
-	return edge(o.area(), dir).Overlaps(rect)
+	return edge(o.area(), dir).Overlaps(shift(rect, dir))
 }
 
 func (o *ObjectWall) Update(context scene.Context) {
@@ -120,7 +140,7 @@ func (o *ObjectFF) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
 	if !o.on {
 		return false
 	}
-	return edge(o.area(), dir).Overlaps(rect)
+	return edge(o.area(), dir).Overlaps(shift(rect, dir))
 }
 
 func (o *ObjectFF) Update(context scene.Context) {
@@ -168,7 +188,7 @@ func (o *ObjectElevator) Overlaps(rect image.Rectangle) bool {
 }
 
 func (o *ObjectElevator) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
-	return edge(o.area(), dir).Overlaps(rect)
+	return edge(o.area(), dir).Overlaps(shift(rect, dir))
 }
 
 func (o *ObjectElevator) Update(context scene.Context) {
@@ -192,7 +212,7 @@ func (o *ObjectGoal) area() image.Rectangle {
 }
 
 func (o *ObjectGoal) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
-	return edge(o.area(), dir).Overlaps(rect)
+	return edge(o.area(), dir).Overlaps(shift(rect, dir))
 }
 
 func (o *ObjectGoal) Update(context scene.Context) {
