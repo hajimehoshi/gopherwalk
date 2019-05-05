@@ -22,25 +22,31 @@ import (
 	"github.com/hajimehoshi/gopherwalk/internal/scene"
 )
 
+func New(id int) *GameScene {
+	f := strToField(testFields[id])
+
+	x, y := f.StartPosition()
+	p := NewPlayer(x, y)
+
+	return &GameScene{
+		id:     id,
+		player: p,
+		field:  f,
+	}
+}
+
 type GameScene struct {
+	id     int
 	player *Player
 	field  *Field
 }
 
 func (s *GameScene) Update(context scene.Context) error {
-	if s.field == nil {
-		s.field = strToField(testField)
-	}
-	if s.player == nil {
-		x, y := s.field.StartPosition()
-		s.player = NewPlayer(x, y)
-	}
-
 	s.field.Update(context)
 	s.player.Update(context, s.field)
 
 	if s.player.AtGoal() {
-		context.GoToTitleScene()
+		context.GoToGameScene(s.id + 1)
 	}
 
 	return nil

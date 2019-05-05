@@ -49,7 +49,7 @@ func (s *SceneManager) Update(screen *ebiten.Image) error {
 
 	n := 1
 	if s.turbo {
-		n = 3
+		n = 5
 	}
 	for i := 0; i < n; i++ {
 		if err := s.current.Update(s); err != nil {
@@ -67,8 +67,8 @@ func (s *SceneManager) GoToTitleScene() {
 	s.next = &titlescene.TitleScene{}
 }
 
-func (s *SceneManager) GoToGameScene() {
-	s.next = &gamescene.GameScene{}
+func (s *SceneManager) GoToGameScene(id int) {
+	s.next = gamescene.New(id)
 }
 
 func (s *SceneManager) Input() scene.Input {

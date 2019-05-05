@@ -96,7 +96,8 @@ func (f *Field) Draw(screen *ebiten.Image) {
 	}
 }
 
-const testField = `
+var testFields = map[int]string{
+	0: `
 w              w
 w              w
 w              w
@@ -112,11 +113,29 @@ w  e..........ww
 w  e           w
 w  e         s w
 wwwwwwwwwwwwwwww
-`
+`,
+	1: `
+w              w
+w              w
+w              w
+w              w
+w              w
+w           g  w
+w  eF.F.F.W.W.W.
+w  e............
+W.F.F.F.F.F.eF.w
+............e..w
+wF.eF.F.F.F.F.W.
+w..e............
+wF.F.F.F.eF.   w
+w........e.. s w
+wwwwwwwwwwwwwwww
+`,
+}
 
 func strToField(str string) *Field {
 	f := &Field{}
-	for j, line := range strings.Split(strings.TrimSpace(testField), "\n") {
+	for j, line := range strings.Split(strings.TrimSpace(str), "\n") {
 		for i, c := range line {
 			switch c {
 			case 'W':
