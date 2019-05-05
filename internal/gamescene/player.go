@@ -24,19 +24,12 @@ import (
 	"github.com/hajimehoshi/gopherwalk/internal/scene"
 )
 
-type PlayerDir int
-
-const (
-	PlayerDirLeft PlayerDir = iota
-	PlayerDirRight
-)
-
 const PlayerUnit = 32
 
 type Player struct {
 	x32     int
 	y32     int
-	dir     PlayerDir
+	dir     Dir
 	falling bool
 }
 
@@ -51,9 +44,9 @@ func (p *Player) Update(context scene.Context, f *Field) {
 	if !f.OverlapsWithFoot(p.footArea()) {
 		if !p.falling {
 			switch p.dir {
-			case PlayerDirLeft:
+			case DirLeft:
 				p.x32 -= 8
-			case PlayerDirRight:
+			case DirRight:
 				p.x32 += 8
 			default:
 				panic("not reached")
@@ -72,19 +65,19 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		} else {
 			a := p.conflictionArea()
 			switch p.dir {
-			case PlayerDirLeft:
+			case DirLeft:
 				a.Min.X--
 				a.Max.X--
 				if f.Overlaps(a) {
-					p.dir = PlayerDirRight
+					p.dir = DirRight
 				} else {
 					p.x32--
 				}
-			case PlayerDirRight:
+			case DirRight:
 				a.Min.X++
 				a.Max.X++
 				if f.Overlaps(a) {
-					p.dir = PlayerDirLeft
+					p.dir = DirLeft
 				} else {
 					p.x32++
 				}
@@ -98,10 +91,10 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		x, y := context.Input().CursorPosition()
 		if image.Pt(x, y).In(p.clickableArea()) && context.Input().IsJustTapped() {
 			switch p.dir {
-			case PlayerDirLeft:
-				p.dir = PlayerDirRight
-			case PlayerDirRight:
-				p.dir = PlayerDirLeft
+			case DirLeft:
+				p.dir = DirRight
+			case DirRight:
+				p.dir = DirLeft
 			default:
 				panic("not reached")
 			}
@@ -118,9 +111,9 @@ func (p *Player) conflictionArea() image.Rectangle {
 func (p *Player) elevatorArea() image.Rectangle {
 	x := 0
 	switch p.dir {
-	case PlayerDirLeft:
+	case DirLeft:
 		x = (p.x32*tileWidth)/PlayerUnit + tileWidth*3/4
-	case PlayerDirRight:
+	case DirRight:
 		x = (p.x32*tileWidth)/PlayerUnit + tileWidth/4 - 1
 	default:
 		panic("not reached")
@@ -138,9 +131,9 @@ func (p *Player) clickableArea() image.Rectangle {
 func (p *Player) footArea() image.Rectangle {
 	x := 0
 	switch p.dir {
-	case PlayerDirLeft:
+	case DirLeft:
 		x = (p.x32 * tileWidth) / PlayerUnit
-	case PlayerDirRight:
+	case DirRight:
 		x = (p.x32*tileWidth)/PlayerUnit + tileWidth/2
 	default:
 		panic("not reached")

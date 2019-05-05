@@ -24,6 +24,15 @@ import (
 	"github.com/hajimehoshi/gopherwalk/internal/scene"
 )
 
+type Dir int
+
+const (
+	DirLeft Dir = iota
+	DirRight
+	DirUp
+	DirDown
+)
+
 const (
 	tileWidth  = 16
 	tileHeight = 16
