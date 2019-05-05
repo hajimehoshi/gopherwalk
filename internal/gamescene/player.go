@@ -27,10 +27,11 @@ import (
 const PlayerUnit = 32
 
 type Player struct {
-	x32     int
-	y32     int
-	dir     Dir
-	falling bool
+	x32      int
+	y32      int
+	dir      Dir
+	climbing bool
+	falling  bool
 }
 
 func NewPlayer(x, y int) *Player {
@@ -41,10 +42,9 @@ func NewPlayer(x, y int) *Player {
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
-	climbing := false
-	if !p.falling && f.InElevator(p.elevatorArea()) {
+	if !p.falling && (!p.climbing && f.OverlapsElevator(p.elevatorArea(), p.dir) || p.climbing && f.InElevator(p.elevatorArea())) {
 		p.y32--
-		climbing = true
+		p.climbing = true
 	} else if !f.OverlapsWithFoot(p.footArea()) {
 		if !p.falling {
 			switch p.dir {
@@ -60,11 +60,13 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		for i := 0; i < 3 && !f.OverlapsWithFoot(p.footArea()); i++ {
 			p.y32++
 		}
+		p.climbing = false
 	} else {
 		p.falling = false
+		p.climbing = false
 	}
 	if !p.falling {
-		if !climbing {
+		if !p.climbing {
 			a := p.conflictionArea()
 			switch p.dir {
 			case DirLeft:

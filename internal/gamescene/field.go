@@ -54,6 +54,19 @@ func (f *Field) OverlapsWithFoot(rect image.Rectangle) bool {
 	return false
 }
 
+func (f *Field) OverlapsElevator(rect image.Rectangle, dir Dir) bool {
+	for _, o := range f.objects {
+		e, ok := o.(*ObjectElevator)
+		if !ok {
+			continue
+		}
+		if e.OverlapsWithDir(rect, dir) {
+			return true
+		}
+	}
+	return false
+}
+
 func (f *Field) InElevator(rect image.Rectangle) bool {
 	for _, o := range f.objects {
 		e, ok := o.(*ObjectElevator)
