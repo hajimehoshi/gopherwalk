@@ -32,6 +32,7 @@ type Player struct {
 	dir      Dir
 	climbing bool
 	falling  bool
+	atGoal   bool
 }
 
 func NewPlayer(x, y int) *Player {
@@ -39,6 +40,10 @@ func NewPlayer(x, y int) *Player {
 		x32: x * PlayerUnit,
 		y32: y * PlayerUnit,
 	}
+}
+
+func (p *Player) AtGoal() bool {
+	return p.atGoal
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
@@ -73,18 +78,22 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		return
 	}
 
+	if f.TouchesGoal(p.conflictionArea(), p.dir) {
+		p.atGoal = true
+		return
+	}
+
 	// Move left or right.
 	if !p.climbing {
-		a := p.conflictionArea()
 		switch p.dir {
 		case DirLeft:
-			if f.Conflicts(a, p.dir) {
+			if f.Conflicts(p.conflictionArea(), p.dir) {
 				p.dir = DirRight
 			} else {
 				p.x32--
 			}
 		case DirRight:
-			if f.Conflicts(a, p.dir) {
+			if f.Conflicts(p.conflictionArea(), p.dir) {
 				p.dir = DirLeft
 			} else {
 				p.x32++

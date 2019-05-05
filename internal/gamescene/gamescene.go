@@ -39,6 +39,10 @@ func (s *GameScene) Update(context scene.Context) error {
 	s.field.Update(context)
 	s.player.Update(context, s.field)
 
+	if s.player.AtGoal() {
+		context.GoToTitleScene()
+	}
+
 	return nil
 }
 

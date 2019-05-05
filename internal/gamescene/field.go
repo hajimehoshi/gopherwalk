@@ -47,6 +47,18 @@ func (f *Field) Conflicts(rect image.Rectangle, dir Dir) bool {
 	return false
 }
 
+func (f *Field) TouchesGoal(rect image.Rectangle, dir Dir) bool {
+	for _, o := range f.objects {
+		if _, ok := o.(*ObjectGoal); !ok {
+			continue
+		}
+		if o.OverlapsWithDir(rect, dir) {
+			return true
+		}
+	}
+	return false
+}
+
 func (f *Field) TouchesElevator(rect image.Rectangle, dir Dir) bool {
 	for _, o := range f.objects {
 		if _, ok := o.(*ObjectElevator); !ok {
