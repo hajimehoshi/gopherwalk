@@ -33,18 +33,21 @@ func (f *Field) StartPosition() (x, y int) {
 	return f.startX, f.startY
 }
 
-func (f *Field) Conflicts(rect image.Rectangle) bool {
-	for _, t := range f.objects {
-		if t.Conflicts(rect) {
+func (f *Field) Overlaps(rect image.Rectangle) bool {
+	for _, o := range f.objects {
+		if _, ok := o.(*ObjectElevator); ok {
+			continue
+		}
+		if o.Overlaps(rect) {
 			return true
 		}
 	}
 	return false
 }
 
-func (f *Field) ConflictsWithFoot(rect image.Rectangle) bool {
-	for _, t := range f.objects {
-		if t.ConflictsWithFoot(rect) {
+func (f *Field) OverlapsWithFoot(rect image.Rectangle) bool {
+	for _, o := range f.objects {
+		if o.OverlapsWithFoot(rect) {
 			return true
 		}
 	}
@@ -52,11 +55,12 @@ func (f *Field) ConflictsWithFoot(rect image.Rectangle) bool {
 }
 
 func (f *Field) InElevator(rect image.Rectangle) bool {
-	for _, t := range f.objects {
-		if _, ok := t.(*ObjectElevator); ok {
-			if t.Touches(rect) {
-				return true
-			}
+	for _, o := range f.objects {
+		if _, ok := o.(*ObjectElevator); !ok {
+			continue
+		}
+		if o.Overlaps(rect) {
+			return true
 		}
 	}
 	return false
@@ -80,7 +84,7 @@ w              w
 w              w
 w              w
 w              w
-w              w
+w g            w
 wW.wF.F.F.F.eF.w
 w..w........e..w
 w           e  w
@@ -88,7 +92,7 @@ w           e  w
 w  eW.F.F.W.W.ww
 w  e..........ww
 w  e           w
-w  e          sw
+w  e         s w
 wwwwwwwwwwwwwwww
 `
 
@@ -110,6 +114,8 @@ func strToField(str string) *Field {
 			case 's':
 				f.startX = i
 				f.startY = j
+			case 'g':
+				f.objects = append(f.objects, &ObjectGoal{x: i, y: j})
 			case '.':
 			default:
 			}

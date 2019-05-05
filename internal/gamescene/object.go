@@ -30,9 +30,8 @@ const (
 )
 
 type Object interface {
-	Touches(rect image.Rectangle) bool
-	Conflicts(rect image.Rectangle) bool
-	ConflictsWithFoot(rect image.Rectangle) bool
+	Overlaps(rect image.Rectangle) bool
+	OverlapsWithFoot(rect image.Rectangle) bool
 
 	Update(context scene.Context)
 	Draw(screen *ebiten.Image)
@@ -54,15 +53,11 @@ func (o *ObjectWall) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectWall) Touches(rect image.Rectangle) bool {
+func (o *ObjectWall) Overlaps(rect image.Rectangle) bool {
 	return o.area().Overlaps(rect)
 }
 
-func (o *ObjectWall) Conflicts(rect image.Rectangle) bool {
-	return o.Touches(rect)
-}
-
-func (o *ObjectWall) ConflictsWithFoot(rect image.Rectangle) bool {
+func (o *ObjectWall) OverlapsWithFoot(rect image.Rectangle) bool {
 	a := o.area()
 	a.Max.Y = a.Min.Y + 1
 	return a.Overlaps(rect)
@@ -103,18 +98,14 @@ func (o *ObjectFF) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectFF) Touches(rect image.Rectangle) bool {
+func (o *ObjectFF) Overlaps(rect image.Rectangle) bool {
 	if !o.on {
 		return false
 	}
 	return o.area().Overlaps(rect)
 }
 
-func (o *ObjectFF) Conflicts(rect image.Rectangle) bool {
-	return o.Touches(rect)
-}
-
-func (o *ObjectFF) ConflictsWithFoot(rect image.Rectangle) bool {
+func (o *ObjectFF) OverlapsWithFoot(rect image.Rectangle) bool {
 	if !o.on {
 		return false
 	}
@@ -157,18 +148,18 @@ type ObjectElevator struct {
 	y int
 }
 
-func (o *ObjectElevator) Touches(rect image.Rectangle) bool {
+func (o *ObjectElevator) area() image.Rectangle {
 	w := tileWidth
 	h := tileHeight
-	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h).Overlaps(rect)
+	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectElevator) Conflicts(rect image.Rectangle) bool {
-	return false
+func (o *ObjectElevator) Overlaps(rect image.Rectangle) bool {
+	return o.area().Overlaps(rect)
 }
 
-func (o *ObjectElevator) ConflictsWithFoot(rect image.Rectangle) bool {
-	return o.Touches(rect)
+func (o *ObjectElevator) OverlapsWithFoot(rect image.Rectangle) bool {
+	return o.area().Overlaps(rect)
 }
 
 func (o *ObjectElevator) Update(context scene.Context) {
@@ -178,4 +169,36 @@ func (o *ObjectElevator) Draw(screen *ebiten.Image) {
 	x := o.x * tileWidth
 	y := o.y * tileHeight
 	ebitenutil.DrawRect(screen, float64(x), float64(y), float64(tileWidth-1), float64(tileHeight-1), color.NRGBA{0xff, 0xff, 0x00, 0xff})
+}
+
+type ObjectGoal struct {
+	x int
+	y int
+}
+
+func (o *ObjectGoal) area() image.Rectangle {
+	w := tileWidth
+	h := tileHeight
+	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
+}
+
+func (o *ObjectGoal) Overlaps(rect image.Rectangle) bool {
+	return o.area().Overlaps(rect)
+}
+
+func (o *ObjectGoal) OverlapsWithFoot(rect image.Rectangle) bool {
+	a := o.area()
+	a.Max.Y = a.Min.Y + 1
+	return a.Overlaps(rect)
+}
+
+func (o *ObjectGoal) Update(context scene.Context) {
+}
+
+func (o *ObjectGoal) Draw(screen *ebiten.Image) {
+	x := o.x * tileWidth
+	y := o.y * tileHeight
+	w := tileWidth - 1
+	h := tileWidth - 1
+	ebitenutil.DrawRect(screen, float64(x), float64(y), float64(w), float64(h), color.NRGBA{0xff, 0x66, 0x00, 0xff})
 }

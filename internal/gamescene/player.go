@@ -48,7 +48,7 @@ func NewPlayer(x, y int) *Player {
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
-	if !f.ConflictsWithFoot(p.footArea()) {
+	if !f.OverlapsWithFoot(p.footArea()) {
 		if !p.falling {
 			switch p.dir {
 			case PlayerDirLeft:
@@ -60,7 +60,7 @@ func (p *Player) Update(context scene.Context, f *Field) {
 			}
 			p.falling = true
 		}
-		for i := 0; i < 3 && !f.ConflictsWithFoot(p.footArea()); i++ {
+		for i := 0; i < 3 && !f.OverlapsWithFoot(p.footArea()); i++ {
 			p.y32++
 		}
 	} else {
@@ -75,7 +75,7 @@ func (p *Player) Update(context scene.Context, f *Field) {
 			case PlayerDirLeft:
 				a.Min.X--
 				a.Max.X--
-				if f.Conflicts(a) {
+				if f.Overlaps(a) {
 					p.dir = PlayerDirRight
 				} else {
 					p.x32--
@@ -83,7 +83,7 @@ func (p *Player) Update(context scene.Context, f *Field) {
 			case PlayerDirRight:
 				a.Min.X++
 				a.Max.X++
-				if f.Conflicts(a) {
+				if f.Overlaps(a) {
 					p.dir = PlayerDirLeft
 				} else {
 					p.x32++
