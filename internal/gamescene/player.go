@@ -41,7 +41,9 @@ func NewPlayer(x, y int) *Player {
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
-	if !f.OverlapsWithFoot(p.footArea()) {
+	if !p.falling && f.InElevator(p.elevatorArea(), p.dir) {
+		p.y32--
+	} else if !f.OverlapsWithFoot(p.footArea()) {
 		if !p.falling {
 			switch p.dir {
 			case DirLeft:
@@ -60,15 +62,13 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		p.falling = false
 	}
 	if !p.falling {
-		if f.InElevator(p.elevatorArea()) {
-			p.y32--
-		} else {
+		if !f.InElevator(p.elevatorArea(), p.dir) {
 			a := p.conflictionArea()
 			switch p.dir {
 			case DirLeft:
 				a.Min.X--
 				a.Max.X--
-				if f.Overlaps(a) {
+				if f.Overlaps(a, p.dir) {
 					p.dir = DirRight
 				} else {
 					p.x32--
@@ -76,7 +76,7 @@ func (p *Player) Update(context scene.Context, f *Field) {
 			case DirRight:
 				a.Min.X++
 				a.Max.X++
-				if f.Overlaps(a) {
+				if f.Overlaps(a, p.dir) {
 					p.dir = DirLeft
 				} else {
 					p.x32++
@@ -85,9 +85,6 @@ func (p *Player) Update(context scene.Context, f *Field) {
 				panic("not reached")
 			}
 		}
-	}
-
-	if !p.falling {
 		x, y := context.Input().CursorPosition()
 		if image.Pt(x, y).In(p.clickableArea()) && context.Input().IsJustTapped() {
 			switch p.dir {

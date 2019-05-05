@@ -38,9 +38,24 @@ const (
 	tileHeight = 16
 )
 
+func edge(area image.Rectangle, from Dir) image.Rectangle {
+	switch from {
+	case DirLeft:
+		area.Min.X = area.Max.X - 1
+	case DirRight:
+		area.Max.X = area.Min.X + 1
+	case DirUp:
+		area.Min.Y = area.Max.Y - 1
+	case DirDown:
+		area.Max.Y = area.Min.Y + 1
+	default:
+		panic("not reached")
+	}
+	return area
+}
+
 type Object interface {
-	Overlaps(rect image.Rectangle) bool
-	OverlapsWithFoot(rect image.Rectangle) bool
+	Overlaps(rect image.Rectangle, dir Dir) bool
 
 	Update(context scene.Context)
 	Draw(screen *ebiten.Image)
@@ -62,14 +77,8 @@ func (o *ObjectWall) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectWall) Overlaps(rect image.Rectangle) bool {
-	return o.area().Overlaps(rect)
-}
-
-func (o *ObjectWall) OverlapsWithFoot(rect image.Rectangle) bool {
-	a := o.area()
-	a.Max.Y = a.Min.Y + 1
-	return a.Overlaps(rect)
+func (o *ObjectWall) Overlaps(rect image.Rectangle, dir Dir) bool {
+	return edge(o.area(), dir).Overlaps(rect)
 }
 
 func (o *ObjectWall) Update(context scene.Context) {
@@ -107,20 +116,11 @@ func (o *ObjectFF) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectFF) Overlaps(rect image.Rectangle) bool {
+func (o *ObjectFF) Overlaps(rect image.Rectangle, dir Dir) bool {
 	if !o.on {
 		return false
 	}
-	return o.area().Overlaps(rect)
-}
-
-func (o *ObjectFF) OverlapsWithFoot(rect image.Rectangle) bool {
-	if !o.on {
-		return false
-	}
-	a := o.area()
-	a.Max.Y = a.Min.Y + 1
-	return a.Overlaps(rect)
+	return edge(o.area(), dir).Overlaps(rect)
 }
 
 func (o *ObjectFF) Update(context scene.Context) {
@@ -163,12 +163,8 @@ func (o *ObjectElevator) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectElevator) Overlaps(rect image.Rectangle) bool {
-	return o.area().Overlaps(rect)
-}
-
-func (o *ObjectElevator) OverlapsWithFoot(rect image.Rectangle) bool {
-	return o.area().Overlaps(rect)
+func (o *ObjectElevator) Overlaps(rect image.Rectangle, dir Dir) bool {
+	return edge(o.area(), dir).Overlaps(rect)
 }
 
 func (o *ObjectElevator) Update(context scene.Context) {
@@ -191,14 +187,8 @@ func (o *ObjectGoal) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectGoal) Overlaps(rect image.Rectangle) bool {
-	return o.area().Overlaps(rect)
-}
-
-func (o *ObjectGoal) OverlapsWithFoot(rect image.Rectangle) bool {
-	a := o.area()
-	a.Max.Y = a.Min.Y + 1
-	return a.Overlaps(rect)
+func (o *ObjectGoal) Overlaps(rect image.Rectangle, dir Dir) bool {
+	return edge(o.area(), dir).Overlaps(rect)
 }
 
 func (o *ObjectGoal) Update(context scene.Context) {
