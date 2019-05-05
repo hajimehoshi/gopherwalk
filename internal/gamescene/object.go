@@ -55,7 +55,7 @@ func edge(area image.Rectangle, from Dir) image.Rectangle {
 }
 
 type Object interface {
-	Overlaps(rect image.Rectangle, dir Dir) bool
+	OverlapsWithDir(rect image.Rectangle, dir Dir) bool
 
 	Update(context scene.Context)
 	Draw(screen *ebiten.Image)
@@ -77,7 +77,7 @@ func (o *ObjectWall) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectWall) Overlaps(rect image.Rectangle, dir Dir) bool {
+func (o *ObjectWall) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
 	return edge(o.area(), dir).Overlaps(rect)
 }
 
@@ -116,7 +116,7 @@ func (o *ObjectFF) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectFF) Overlaps(rect image.Rectangle, dir Dir) bool {
+func (o *ObjectFF) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
 	if !o.on {
 		return false
 	}
@@ -163,7 +163,11 @@ func (o *ObjectElevator) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectElevator) Overlaps(rect image.Rectangle, dir Dir) bool {
+func (o *ObjectElevator) Overlaps(rect image.Rectangle) bool {
+	return o.area().Overlaps(rect)
+}
+
+func (o *ObjectElevator) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
 	return edge(o.area(), dir).Overlaps(rect)
 }
 
@@ -173,7 +177,7 @@ func (o *ObjectElevator) Update(context scene.Context) {
 func (o *ObjectElevator) Draw(screen *ebiten.Image) {
 	x := o.x * tileWidth
 	y := o.y * tileHeight
-	ebitenutil.DrawRect(screen, float64(x), float64(y), float64(tileWidth-1), float64(tileHeight-1), color.NRGBA{0xff, 0xff, 0x00, 0xff})
+	ebitenutil.DrawRect(screen, float64(x), float64(y), float64(tileWidth), float64(tileHeight), color.NRGBA{0xff, 0xff, 0x00, 0xff})
 }
 
 type ObjectGoal struct {
@@ -187,7 +191,7 @@ func (o *ObjectGoal) area() image.Rectangle {
 	return image.Rect(o.x*tileWidth, o.y*tileHeight, o.x*tileWidth+w, o.y*tileHeight+h)
 }
 
-func (o *ObjectGoal) Overlaps(rect image.Rectangle, dir Dir) bool {
+func (o *ObjectGoal) OverlapsWithDir(rect image.Rectangle, dir Dir) bool {
 	return edge(o.area(), dir).Overlaps(rect)
 }
 

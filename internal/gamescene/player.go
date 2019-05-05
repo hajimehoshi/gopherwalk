@@ -41,8 +41,10 @@ func NewPlayer(x, y int) *Player {
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
-	if !p.falling && f.InElevator(p.elevatorArea(), p.dir) {
+	climbing := false
+	if !p.falling && f.InElevator(p.elevatorArea()) {
 		p.y32--
+		climbing = true
 	} else if !f.OverlapsWithFoot(p.footArea()) {
 		if !p.falling {
 			switch p.dir {
@@ -62,7 +64,7 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		p.falling = false
 	}
 	if !p.falling {
-		if !f.InElevator(p.elevatorArea(), p.dir) {
+		if !climbing {
 			a := p.conflictionArea()
 			switch p.dir {
 			case DirLeft:
@@ -109,9 +111,9 @@ func (p *Player) elevatorArea() image.Rectangle {
 	x := 0
 	switch p.dir {
 	case DirLeft:
-		x = (p.x32*tileWidth)/PlayerUnit + tileWidth*3/4
+		x = (p.x32*tileWidth)/PlayerUnit + tileWidth*3/4 - 1
 	case DirRight:
-		x = (p.x32*tileWidth)/PlayerUnit + tileWidth/4 - 1
+		x = (p.x32*tileWidth)/PlayerUnit + tileWidth/4
 	default:
 		panic("not reached")
 	}
