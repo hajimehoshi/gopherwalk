@@ -42,10 +42,10 @@ func NewPlayer(x, y int) *Player {
 }
 
 func (p *Player) Update(context scene.Context, f *Field) {
-	if !p.falling && (!p.climbing && f.OverlapsElevator(p.elevatorArea(), p.dir) || p.climbing && f.InElevator(p.elevatorArea())) {
+	if !p.falling && (!p.climbing && f.TouchesElevator(p.elevatorArea(), p.dir) || p.climbing && f.InElevator(p.elevatorArea())) {
 		p.y32--
 		p.climbing = true
-	} else if !f.OverlapsWithFoot(p.footArea()) {
+	} else if !f.Conflicts(p.footArea(), DirDown) {
 		if !p.falling {
 			switch p.dir {
 			case DirLeft:
@@ -57,7 +57,7 @@ func (p *Player) Update(context scene.Context, f *Field) {
 			}
 			p.falling = true
 		}
-		for i := 0; i < 3 && !f.OverlapsWithFoot(p.footArea()); i++ {
+		for i := 0; i < 3 && !f.Conflicts(p.footArea(), DirDown); i++ {
 			p.y32++
 		}
 		p.climbing = false
@@ -65,40 +65,46 @@ func (p *Player) Update(context scene.Context, f *Field) {
 		p.falling = false
 		p.climbing = false
 	}
-	if !p.falling {
-		if !p.climbing {
-			a := p.conflictionArea()
-			switch p.dir {
-			case DirLeft:
-				a.Min.X--
-				a.Max.X--
-				if f.Overlaps(a, p.dir) {
-					p.dir = DirRight
-				} else {
-					p.x32--
-				}
-			case DirRight:
-				a.Min.X++
-				a.Max.X++
-				if f.Overlaps(a, p.dir) {
-					p.dir = DirLeft
-				} else {
-					p.x32++
-				}
-			default:
-				panic("not reached")
-			}
-		}
-		x, y := context.Input().CursorPosition()
-		if image.Pt(x, y).In(p.clickableArea()) && context.Input().IsJustTapped() {
-			switch p.dir {
-			case DirLeft:
+
+	if p.falling {
+		return
+	}
+
+	// Move left or right.
+	if !p.climbing {
+		a := p.conflictionArea()
+		switch p.dir {
+		case DirLeft:
+			a.Min.X--
+			a.Max.X--
+			if f.Conflicts(a, p.dir) {
 				p.dir = DirRight
-			case DirRight:
-				p.dir = DirLeft
-			default:
-				panic("not reached")
+			} else {
+				p.x32--
 			}
+		case DirRight:
+			a.Min.X++
+			a.Max.X++
+			if f.Conflicts(a, p.dir) {
+				p.dir = DirLeft
+			} else {
+				p.x32++
+			}
+		default:
+			panic("not reached")
+		}
+	}
+
+	// Turn by tapping.
+	x, y := context.Input().CursorPosition()
+	if image.Pt(x, y).In(p.clickableArea()) && context.Input().IsJustTapped() {
+		switch p.dir {
+		case DirLeft:
+			p.dir = DirRight
+		case DirRight:
+			p.dir = DirLeft
+		default:
+			panic("not reached")
 		}
 	}
 }
