@@ -18,6 +18,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/inpututil"
 
+	"github.com/hajimehoshi/gopherwalk/internal/fieldselectorscene"
 	"github.com/hajimehoshi/gopherwalk/internal/gamescene"
 	"github.com/hajimehoshi/gopherwalk/internal/scene"
 	"github.com/hajimehoshi/gopherwalk/internal/titlescene"
@@ -65,6 +66,10 @@ func (s *SceneManager) Update(screen *ebiten.Image) error {
 
 func (s *SceneManager) GoToTitleScene() {
 	s.next = &titlescene.TitleScene{}
+}
+
+func (s *SceneManager) GoToFieldSelectorScene() {
+	s.next = fieldselectorscene.New()
 }
 
 func (s *SceneManager) GoToGameScene(id int) {

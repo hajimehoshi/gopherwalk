@@ -25,7 +25,7 @@ type TitleScene struct{}
 
 func (t *TitleScene) Update(context scene.Context) error {
 	if context.Input().IsJustTapped() {
-		context.GoToGameScene(1)
+		context.GoToFieldSelectorScene()
 		return nil
 	}
 	return nil

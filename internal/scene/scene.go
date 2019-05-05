@@ -20,6 +20,7 @@ import (
 
 type Context interface {
 	GoToTitleScene()
+	GoToFieldSelectorScene()
 	GoToGameScene(fieldID int)
 
 	Input() Input

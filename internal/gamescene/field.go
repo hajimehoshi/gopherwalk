@@ -97,7 +97,7 @@ func (f *Field) Draw(screen *ebiten.Image) {
 }
 
 var testFields = map[int]string{
-	0: `
+	1: `
 w              w
 w              w
 w              w
@@ -114,7 +114,7 @@ w  e           w
 w  e         s w
 wwwwwwwwwwwwwwww
 `,
-	1: `
+	2: `
 w              w
 w              w
 w              w
